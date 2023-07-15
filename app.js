@@ -6,14 +6,14 @@ var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-var coolRouter = require('./routes/cool');
+const catalogRouter = require("./routes/catalog"); //Import routes for "catalog" area of site
 
 var app = express();
 
 // Set up mongoose connection
 const mongoose = require("mongoose");
 mongoose.set('strictQuery', false);
-const mongoDB = "mongodb+srv://tjbermant:pDJ3OdQoXbVMUxj@cluster0.0snv38w.mongodb.net/?retryWrites=true&w=majorityX";
+const mongoDB = "mongodb+srv://tjbermant:ygfJ00ObdnFpJule@cluster0.0snv38w.mongodb.net/?retryWrites=true&w=majorityX";
 
 main().catch(err => console.log(err));
 async function main() {
@@ -33,7 +33,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/users/cool', coolRouter);
+app.use('/catalog', catalogRouter); // Add catalog routes to middleware chain.
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

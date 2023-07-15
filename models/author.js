@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
+const { DateTime } = require("luxon");
 
-const schema = mongoose.Schema;
+const Schema = mongoose.Schema;
 
 const AuthorSchema = new Schema({
   first_name: { type: String, required: true, maxLength: 100 },
@@ -10,17 +11,43 @@ const AuthorSchema = new Schema({
 });
 
 // Virtual for author's full name
-AuthorSchema.virtual("name").get(function() {
+AuthorSchema.virtual("name").get(function () {
+  // To avoid errors in cases where an author does not have either a family name or first name
+  // We want to make sure we handle the exception by returning an empty string for that case
   let fullname = "";
   if (this.first_name && this.family_name) {
     fullname = `${this.family_name}, ${this.first_name}`;
   }
   if (!this.first_name || !this.family_name) {
-    fullname = ""
+    fullname = "";
   }
   return fullname;
-})
+});
 
+// AuthorSchema.virtual("birthdate").get(function () {
+//   return this.date_of_birth ? DateTime.fromJSDate(this.date_of_birth).toLocaleString(DateTime.DATE_MED) : " - ";
+// });
+
+AuthorSchema.virtual("lifespan").get(function () {
+  let date1 = this.date_of_birth ? DateTime.fromJSDate(this.date_of_birth).toLocaleString(DateTime.DATE_MED) : "";
+  let date2 = this.date_of_death ? DateTime.fromJSDate(this.date_of_death).toLocaleString(DateTime.DATE_MED) : "";
+
+  if (date1 && date2) {
+    return date1 + " - " + date2;
+  }
+  if (date1 && !date2) {
+    return date1 + " - Present";
+  }
+  if (!date1 && !date2) {
+    return "No Data";
+  }
+});
+
+// Virtual for author's URL
 AuthorSchema.virtual("url").get(function () {
+  // We don't use an arrow function as we'll need the this object
   return `/catalog/author/${this._id}`;
-})
+});
+
+// Export model
+module.exports = mongoose.model("Author", AuthorSchema);
